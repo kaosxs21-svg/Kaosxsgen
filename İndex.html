@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KaosXS - Serbest Gen PRO</title>
+    <style>
+        :root {
+            --accent: #0071e3;
+            --bg: #ffffff;
+            --text: #1d1d1f;
+            --input-bg: #f5f5f7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background-color: #fafafa;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .gen-wrapper {
+            background: var(--bg);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        .input-box {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #86868b;
+            margin-bottom: 8px;
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--input-bg);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+        button:active { transform: scale(0.98); }
+
+        #output {
+            margin-top: 25px;
+            background: #fdfdfd;
+            border: 1px solid #efefef;
+            border-radius: 14px;
+            padding: 15px;
+            font-family: "SF Mono", "Fira Code", monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            color: #333;
+        }
+
+        .copy-all {
+            background: #1d1d1f;
+            font-size: 14px;
+            display: none;
+        }
+
+        .footer {
+            margin-top: 35px;
+            text-align: center;
+            font-size: 11px;
+            color: #bebebe;
+            border-top: 1px solid #f2f2f2;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="gen-wrapper">
+    <h1>White Generator</h1>
+    
+    <div class="input-box">
+        <label>BIN / FORMAT</label>
+        <input type="text" id="bin" placeholder="Örn: 530105">
+    </div>
+
+    <div class="grid">
+        <div class="input-box">
+            <label>ADET</label>
+            <input type="number" id="qty" value="10">
+        </div>
+        <div class="input-box">
+            <label>AY</label>
+            <input type="text" id="mon" placeholder="MM">
+        </div>
+        <div class="input-box">
+            <label>YIL</label>
+            <input type="text" id="year" placeholder="YYYY">
+        </div>
+    </div>
+
+    <div class="input-box">
+        <label>CVV</label>
+        <input type="text" id="cvv" placeholder="Rnd">
+    </div>
+
+    <button onclick="runKaosGen()">ÜRETİMİ BAŞLAT</button>
+
+    <div id="output"></div>
+    <button id="copyBtn" class="copy-all" onclick="copyAll()">PANELİ KOPYALA</button>
+
+    <div class="footer">
+        © <span id="y"></span> Kaos sh| Tüm hakları saklıdır
+    </div>
+</div>
+
+<script>
+    // Zamanı ve Domain Uyumluluğunu Ayarla
+    const currentYear = new Date().getFullYear();
+    document.getElementById('y').innerText = currentYear;
+
+    function luhn(n) {
+        let s = 0;
+        for (let i = n.length - 1; i >= 0; i--) {
+            let d = parseInt(n.charAt(i));
+            if ((n.length - 1 - i) % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+            s += d;
+        }
+        return s % 10 === 0;
+    }
+
+    function runKaosGen() {
+        let b = document.getElementById('bin').value.replace(/\s+/g, '');
+        let q = parseInt(document.getElementById('qty').value);
+        let out = document.getElementById('output');
+        
+        if (!b) { alert("BIN Boş Olamaz!"); return; }
+
+        let res = "";
+        for (let i = 0; i < q; i++) {
+            let cc = b;
+            // Serbest uzunluk tamamlama
+            while (cc.length < 15) cc += Math.floor(Math.random() * 10);
+            if(cc.length === 15) {
+                for (let j = 0; j <= 9; j++) {
+                    if (luhn(cc + j)) { cc += j; break; }
+                }
+            }
+
+            let m = document.getElementById('mon').value || ("0" + (Math.floor(Math.random() * 12) + 1)).slice(-2);
+            let y = document.getElementById('year').value || (currentYear + Math.floor(Math.random() * 7));
+            let c = document.getElementById('cvv').value || Math.floor(Math.random() * 899 + 100);
+
+            res += `${cc}|${m}|${y}|${c}\n`;
+        }
+
+        out.innerText = res;
+        out.style.display = "block";
+        document.getElementById('copyBtn').style.display = "block";
+    }
+
+    function copyAll() {
+        navigator.clipboard.writeText(document.getElementById('output').innerText);
+        alert("Kopyalandı! @Kaosxs");
+    }
+</script>
+
+</body>
+</html>
+ 
